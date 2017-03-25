@@ -7,7 +7,7 @@
  *  Notes: The ISO Base file format data is ideally arranged for an OO model.However, since
  *  this simplified exercise does not require any saving of the tree structure of nodes, or
  *  any box data, except for mdat, a simple C-style recursion will suffice. The data is already
- *  arranged in a tree structure, so a simpel recursion is implemented here.
+ *  arranged in a tree structure, so a simple recursion is implemented here.
  */
 
 #include <iostream>
@@ -19,7 +19,7 @@
 
 
 
-
+// Process mdat file contents
 void processMDAT(FILE *fp, unsigned int size)
 {
 	char *mdatBuffer = (char *)malloc(size);
@@ -33,6 +33,7 @@ void processMDAT(FILE *fp, unsigned int size)
 	free(mdatBuffer);
 }
 
+// Recursive function to process boxes and their children
 int processBox(FILE *fp)
 {
 	unsigned int boxSize;
@@ -50,11 +51,13 @@ int processBox(FILE *fp)
 
 	printf("Found box of type %s and size %d\n", boxType, boxSize);
 
+	// MOOF and TRAF boxes have other boxes in them.
 	if(!strcmp("moof",(char*)boxType) || !strcmp("traf",(char *)boxType))
 		{
 			// These boxes have boxes embedded
 			return processBox(fp);
 	    }
+	// Process an mdat box wherever it occurs
 	if(!strcmp("mdat", (char *)boxType))
 	{
 		processMDAT(fp, boxSize -8);
@@ -71,9 +74,17 @@ int processBox(FILE *fp)
 	return 1;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-	FILE *fp =fopen("text0.mp4","rb");
+
+	FILE *fp;
+
+	if(argc < 2){
+		printf("Usage: box <filename>\n");
+		exit(0);
+	}
+
+	fp = fopen(argv[1],"rb");
 
 	if(!fp){
 			printf("File not found\n");
