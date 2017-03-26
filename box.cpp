@@ -20,17 +20,19 @@
 
 
 // Process mdat file contents
-void processMDAT(FILE *fp, unsigned int size)
+int processMDAT(FILE *fp, unsigned int size)
 {
-	char *mdatBuffer = (char *)malloc(size);
+	char *mdatBuffer = new char[size];
+
 
 	if (fread(mdatBuffer,1,size,fp) !=size)
 	{
 		printf("Could not read MDAT data \n");
-		return;
+		return 0;
 	}
 	printf("%s\n", mdatBuffer);
-	free(mdatBuffer);
+	delete [] mdatBuffer;
+	return 1;
 }
 
 // Recursive function to process boxes and their children
@@ -60,7 +62,7 @@ int processBox(FILE *fp)
 	// Process an mdat box wherever it occurs
 	if(!strcmp("mdat", (char *)boxType))
 	{
-		processMDAT(fp, boxSize -8);
+		return processMDAT(fp, boxSize -8);
 	}
 
 	else
