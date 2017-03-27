@@ -16,6 +16,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+// Return values for EOF or read failure
+const unsigned char success = 1;
+const unsigned char fail = 0;
 
 
 
@@ -28,11 +31,11 @@ int processMDAT(FILE *fp, unsigned int size)
 	if (fread(mdatBuffer,1,size,fp) !=size)
 	{
 		printf("Could not read MDAT data \n");
-		return 0;
+		return fail;
 	}
 	printf("%s\n", mdatBuffer);
 	delete [] mdatBuffer;
-	return 1;
+	return success;
 }
 
 // Recursive function to process boxes and their children
@@ -43,12 +46,12 @@ int processBox(FILE *fp)
 
 	if(fread(&boxSize,4,1,fp) != 1)
 	{
-		return 0;
+		return fail;
 	}
 	boxSize = ntohl(boxSize);
 	if(fread(boxType,4,1,fp) != 1)
 	{
-		return 0;
+		return fail;
 	}
 
 	printf("Found box of type %s and size %d\n", boxType, boxSize);
@@ -70,10 +73,10 @@ int processBox(FILE *fp)
 		// All other boxes, discard the data
 		if(fseek(fp, boxSize -8,SEEK_CUR))
 		{
-			return 0;
+			return fail;
 		}
 	}
-	return 1;
+	return success;
 }
 
 int main(int argc, char **argv)
@@ -94,6 +97,8 @@ int main(int argc, char **argv)
 	}
 
 	while(processBox(fp));
+	fclose(fp);
+	return success;
 }
 
 
